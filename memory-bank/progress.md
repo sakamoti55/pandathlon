@@ -174,16 +174,16 @@ All major routes are defined and accessible:
 
 ### 🟡 High Priority (Important Features)
 
-2. **User Dashboard** (`/mypage`, `/mypage/quizzes`, `/mypage/quizzes/[quizId]`)
+2. **User Quiz Management** (`/mypage/quizzes`, `/mypage/quizzes/[quizId]`)
 
-   - Current Status: Basic structure only
+   - Current Status: Unimplemented
    - Needed:
-     - Dashboard overview page (`/mypage`)
      - List user's created quizzes (`/mypage/quizzes`)
      - Show quiz status (pending/ready/published)
+     - Quiz detail/edit page (`/mypage/quizzes/[quizId]`)
      - Edit quiz metadata
      - Delete quizzes
-     - View statistics
+     - View quiz statistics
    - Impact: User management and control
 
 3. **Improved Quiz Management**
@@ -417,6 +417,7 @@ None identified yet (limited testing so far)
 - [x] SNS sharing functionality (NEWLY COMPLETED)
 - [x] Bookmark/favorite system (NEWLY COMPLETED)
 - [x] Shared quiz display components (NEWLY COMPLETED)
+- [x] User dashboard portal page (NEWLY COMPLETED - 2025/11/02)
 
 ### 🔄 In Progress
 
