@@ -80,6 +80,34 @@ User Request → enqueue-quiz-requests → PGMQ Queue → dequeue-quiz-requests 
 Browser → Auth Request → Supabase → JWT Token → Stored in Cookies → Auto-refresh
 ```
 
+**Route Protection Pattern**:
+
+- Middleware only protects `/mypage/*` routes (user-specific pages)
+- Public routes accessible without authentication:
+  - `/` - Home page
+  - `/signup` - User registration
+  - `/quizzes/*` - All quiz browsing and taking pages
+  - `/login` - Login page
+  - `/auth/*` - Auth callbacks
+  - `/error` - Error pages
+- Protected routes (require authentication):
+  - `/mypage` - User dashboard
+  - `/mypage/quizzes/new` - Quiz creation
+  - `/mypage/favorite` - Bookmarked quizzes
+  - `/mypage/history` - Quiz history
+  - All other `/mypage/*` paths
+
+**Implementation** (`utils/supabase/middleware.js`):
+
+```javascript
+if (!user && request.nextUrl.pathname.startsWith("/mypage")) {
+  // Redirect to login only for /mypage routes
+  const url = request.nextUrl.clone();
+  url.pathname = "/login";
+  return NextResponse.redirect(url);
+}
+```
+
 ### 3. Data Model
 
 **Core Entities**:

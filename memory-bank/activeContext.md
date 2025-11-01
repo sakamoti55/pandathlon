@@ -163,6 +163,7 @@ Currently, the `dequeue-quiz-requests` function uses hardcoded mock data to demo
       - Type-safe quiz display
 
 13. **User Dashboard Portal** (NEWLY IMPLEMENTED - 2025/11/02)
+
     - Dashboard page (`/mypage`)
       - Server component with authentication check
       - User information display (nickname from user_metadata, email)
@@ -181,6 +182,19 @@ Currently, the `dequeue-quiz-requests` function uses hardcoded mock data to demo
       - Responsive grid layout (1 col mobile, 2 col tablet, 3/4 cols desktop)
       - Hover scale effect on quick access cards
       - "View all" links for recent activity sections
+
+14. **Authentication Middleware Fix** (2025/11/02)
+    - Fixed overly restrictive middleware that was redirecting all unauthenticated users to `/login`
+    - Modified `utils/supabase/middleware.js` to only protect `/mypage/*` routes
+    - Public routes now accessible without authentication:
+      - `/` - Home page
+      - `/signup` - User registration
+      - `/quizzes/*` - All quiz browsing and taking pages
+    - Protected routes (require authentication):
+      - `/mypage/*` - All user-specific pages
+    - Implementation: Simple path check `request.nextUrl.pathname.startsWith("/mypage")`
+    - Allows anonymous users to browse and take quizzes
+    - Only redirects to login when accessing personal user data
 
 ## Next Steps
 
