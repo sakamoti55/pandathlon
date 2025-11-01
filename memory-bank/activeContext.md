@@ -4,14 +4,18 @@
 
 ### Immediate Status
 
-The project has established its core infrastructure and basic functionality:
+The project has achieved significant progress with most core features implemented:
 
 - Frontend scaffolding is complete
 - Authentication flow is fully implemented with separated signup/login pages
 - Quiz creation form is functional
 - Queue-based processing infrastructure is in place
-- Dynamic navigation based on authentication state
-- **Primary gap**: LLM integration for quiz generation
+- **Quiz taking flow is fully implemented** (NEW)
+- **Quiz results display with SNS sharing** (NEW)
+- **Hot/Recent quiz discovery pages** (NEW)
+- **User quiz history tracking** (NEW)
+- Dynamic navigation with all quiz-related features
+- **Primary remaining gap**: LLM integration for quiz generation
 
 ### Active Task Area
 
@@ -21,7 +25,7 @@ The main TODO identified in the codebase is the LLM integration in the dequeue f
 // TODO dataの内容からLLMにリクエストを行いresponseを取得する
 ```
 
-Currently, the `dequeue-quiz-requests` function uses hardcoded mock data to demonstrate the flow.
+Currently, the `dequeue-quiz-requests` function uses hardcoded mock data to demonstrate the flow. All other user-facing features are complete and ready for LLM integration.
 
 ## Recent Changes
 
@@ -56,9 +60,65 @@ Currently, the `dequeue-quiz-requests` function uses hardcoded mock data to demo
    - Many-to-many relationship through quiz_element_score table
 
 5. **Page Structure**
+
    - All major routes defined
    - Navigation and layout implemented with auth state awareness
    - Japanese UI throughout
+
+6. **Quiz Taking System** (NEWLY IMPLEMENTED)
+
+   - Quiz display page (`/quizzes/[quizId]`)
+     - Fetches quiz and questions from database
+     - 7-point scale (-3 to +3) for answers
+     - Progress bar showing completion percentage
+     - Question-by-question navigation
+     - Server action for answer submission
+   - Quiz results page (`/quizzes/[quizId]/results`)
+     - Score calculation based on weighted responses
+     - Displays winning result type
+     - SNS sharing (X/Twitter)
+     - URL copy functionality (Client Component)
+     - OGP metadata for social sharing
+   - Server action pattern for form submission
+     - `actions.js` handles answer submission
+     - Records user_id if logged in, null otherwise
+     - Inserts to `answers` and `answer_details` tables
+
+7. **Quiz Discovery Pages** (NEWLY IMPLEMENTED)
+
+   - Hot quizzes page (`/quizzes/hot`)
+     - Ranks by answer count from `answers` table
+     - Shows top 50 most answered quizzes
+   - Recent quizzes page (`/quizzes/recent`)
+     - Orders by latest answer timestamp
+     - Shows recently answered quizzes
+   - All quizzes page (`/quizzes`)
+     - Lists all published quizzes
+     - Shows answer counts and creation dates
+     - Quick links to hot/recent pages
+
+8. **User Quiz History** (NEWLY IMPLEMENTED)
+
+   - History page (`/mypage/history`)
+     - Login required
+     - Lists all quizzes user has taken
+     - Links to view results or retake quiz
+     - Shows answer timestamps
+
+9. **Enhanced Navigation**
+
+   - Sidebar menu with categorized links
+   - Quiz discovery section (all/hot/recent)
+   - User section (dashboard/create/history/favorites)
+   - Account section (login/logout)
+   - Auth-aware display
+
+10. **Improved Home Page**
+    - Hero section with CTA
+    - Feature showcase cards
+    - Quick links to hot/recent quizzes
+    - Featured quizzes display
+    - User-specific quick actions
 
 ## Next Steps
 
@@ -232,22 +292,29 @@ The separation of quiz_elements and quiz_element_score is elegant:
   - Login actions: `frontennd/src/app/login/actions.js` (login, logout)
   - Signup page: `frontennd/src/app/signup/page.jsx`
   - Signup actions: `frontennd/src/app/signup/actions.js`
-- **Quiz Form**: `frontennd/src/app/mypage/quizzes/new/page.jsx`
-- **Enqueue**: `frontennd/supabase/functions/enqueue-quiz-requests/index.js`
-- **Dequeue (needs LLM)**: `frontennd/supabase/functions/dequeue-quiz-requests/index.js`
-- **Layout**: `frontennd/src/app/layout.jsx` (async server component with auth state)
+- **Quiz Creation**:
+  - Creation form: `frontennd/src/app/mypage/quizzes/new/page.jsx`
+  - Enqueue function: `frontennd/supabase/functions/enqueue-quiz-requests/index.js`
+  - Dequeue function (needs LLM): `frontennd/supabase/functions/dequeue-quiz-requests/index.js`
+- **Quiz Taking** (NEW):
+  - Quiz page: `frontennd/src/app/quizzes/[quizId]/page.jsx` (Client Component)
+  - Submit action: `frontennd/src/app/quizzes/[quizId]/actions.js` (Server Action)
+  - Results page: `frontennd/src/app/quizzes/[quizId]/results/page.jsx` (Server Component)
+  - Share buttons: `frontennd/src/app/quizzes/[quizId]/results/ShareButtons.jsx` (Client Component)
+- **Quiz Discovery** (NEW):
+  - All quizzes: `frontennd/src/app/quizzes/page.jsx`
+  - Hot quizzes: `frontennd/src/app/quizzes/hot/page.jsx`
+  - Recent quizzes: `frontennd/src/app/quizzes/recent/page.jsx`
+  - User history: `frontennd/src/app/mypage/history/page.jsx`
+- **Layout & Navigation**: `frontennd/src/app/layout.jsx` (async server component with auth state)
+- **Home Page**: `frontennd/src/app/page.jsx` (updated with feature showcase)
 - **Supabase Clients**: `frontennd/src/utils/supabase/*.js`
 
-### Unimplemented Pages (shells exist)
+### Remaining Unimplemented Pages
 
-- `/quizzes/[quizId]` - Quiz taking interface
-- `/quizzes/[quizId]/results` - Results display
-- `/quizzes` - Main quiz browser
-- `/quizzes/hot` - Trending quizzes
-- `/quizzes/recent` - Recent quizzes
 - `/mypage` - User dashboard
-- `/mypage/quizzes/[quizId]` - User's quiz detail
-- `/mypage/favorite` - Favorited quizzes
+- `/mypage/quizzes/[quizId]` - User's quiz detail/edit
+- `/mypage/favorite` - Favorited quizzes (bookmark functionality)
 
 ## Environment & Configuration
 
