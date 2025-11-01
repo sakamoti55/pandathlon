@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { createClient } from "../../../utils/supabase/client";
 import { submitQuizAnswers } from "./actions";
+import BookmarkButton from "../../components/BookmarkButton";
+import { getBookmarkStatus } from "../../components/bookmarkActions";
 
 export default function QuizPage({ params }) {
   const [quiz, setQuiz] = useState(null);
@@ -12,12 +14,20 @@ export default function QuizPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     async function fetchQuiz() {
       try {
         const supabase = createClient();
         const quizId = (await params).quizId;
+
+        // Get current user
+        const {
+          data: { user: currentUser },
+        } = await supabase.auth.getUser();
+        setUser(currentUser);
 
         // Fetch quiz data
         const { data: quizData, error: quizError } = await supabase
@@ -37,6 +47,12 @@ export default function QuizPage({ params }) {
           .order("id");
 
         if (elementsError) throw elementsError;
+
+        // Check bookmark status if user is logged in
+        if (currentUser) {
+          const bookmarkStatus = await getBookmarkStatus(quizId);
+          setIsBookmarked(bookmarkStatus);
+        }
 
         setQuiz(quizData);
         setQuestions(elementsData);
@@ -115,7 +131,17 @@ export default function QuizPage({ params }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">{quiz.title}</h1>
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <h1 className="text-3xl font-bold flex-1">{quiz.title}</h1>
+        {user && (
+          <BookmarkButton
+            quizId={quiz.id}
+            initialBookmarked={isBookmarked}
+            variant="icon"
+            size="lg"
+          />
+        )}
+      </div>
       <p className="mb-8 text-gray-600">{quiz.description}</p>
 
       {/* Progress bar */}

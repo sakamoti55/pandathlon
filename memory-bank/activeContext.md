@@ -14,6 +14,8 @@ The project has achieved significant progress with most core features implemente
 - **Quiz results display with SNS sharing** (NEW)
 - **Hot/Recent quiz discovery pages** (NEW)
 - **User quiz history tracking** (NEW)
+- **Bookmark/Favorite functionality** (NEW)
+- **Shared quiz display components** (NEW)
 - Dynamic navigation with all quiz-related features
 - **Primary remaining gap**: LLM integration for quiz generation
 
@@ -114,17 +116,56 @@ Currently, the `dequeue-quiz-requests` function uses hardcoded mock data to demo
    - Auth-aware display
 
 10. **Improved Home Page**
+
     - Hero section with CTA
     - Feature showcase cards
     - Quick links to hot/recent quizzes
     - Featured quizzes display
     - User-specific quick actions
 
+11. **Bookmark/Favorite System** (NEWLY IMPLEMENTED)
+
+    - Server actions for bookmark management (`/app/components/bookmarkActions.js`)
+      - `toggleBookmark()` - Add/remove bookmarks
+      - `getBookmarkStatus()` - Check bookmark state
+      - `getUserBookmarks()` - Get user's bookmarked quiz IDs
+    - BookmarkButton component (`/app/components/BookmarkButton.jsx`)
+      - Client component with optimistic updates
+      - Heart icon (filled when bookmarked)
+      - useTransition for smooth UX
+      - Variants: "icon" or "button"
+    - Favorite page (`/mypage/favorite`)
+      - Lists user's bookmarked quizzes
+      - Sorted by bookmark date (descending)
+      - Uses QuizCard component
+    - Quiz detail page bookmark button
+      - Shows in quiz title area
+      - Only visible to logged-in users
+      - Integrated with quiz taking flow
+
+12. **Shared Quiz Display Components** (NEWLY IMPLEMENTED)
+    - QuizCard component (`/app/components/QuizCard.jsx`)
+      - Server component for quiz display
+      - Reusable across all quiz list pages
+      - Integrated bookmark button
+      - Flexible additional info display
+      - Props: quiz, showBookmark, additionalInfo, href, actions
+    - Applied to all quiz listing pages:
+      - `/quizzes` - All quizzes with answer counts and dates
+      - `/quizzes/hot` - Hot quizzes with rankings
+      - `/quizzes/recent` - Recent quizzes with latest answer times
+      - `/mypage/favorite` - Favorite quizzes with bookmark dates
+    - Benefits:
+      - Consistent UI across all quiz lists
+      - Bookmark functionality everywhere
+      - Easier maintenance
+      - Type-safe quiz display
+
 ## Next Steps
 
 ### Immediate Priorities
 
-1. **LLM Integration**
+1. **LLM Integration** (PRIMARY REMAINING TASK)
 
    - Select LLM provider (OpenAI, Anthropic, Google, etc.)
    - Design prompt template for quiz generation
@@ -132,25 +173,18 @@ Currently, the `dequeue-quiz-requests` function uses hardcoded mock data to demo
    - Parse and validate LLM responses
    - Handle errors and edge cases
 
-2. **Quiz Taking Flow**
+2. **User Dashboard Completion**
 
-   - Implement quiz display page (`/quizzes/[quizId]`)
-   - Create question answering interface
-   - Score calculation logic
-   - Results display page (`/quizzes/[quizId]/results`)
-
-3. **Quiz Browsing**
-
-   - Implement hot/trending logic (`/quizzes/hot`)
-   - Recent quizzes listing (`/quizzes/recent`)
-   - Search/filter functionality
-   - Pagination
-
-4. **User Dashboard**
    - My quizzes listing (`/mypage/quizzes`)
    - Quiz status tracking (pending/ready)
    - Edit/delete functionality
-   - Favorites management (`/mypage/favorite`)
+   - Dashboard overview page (`/mypage`)
+
+3. **Additional Features**
+   - Search/filter functionality for quizzes
+   - Pagination for quiz lists
+   - Quiz categories/tags
+   - User profiles and stats
 
 ## Active Decisions & Considerations
 
@@ -205,6 +239,27 @@ This structure should be maintained when implementing LLM integration.
 - Navigation dynamically shows login/logout based on auth state
 - Quiz creation uses client-side function
 - Layout is async server component that checks auth state
+
+### Bookmark/Favorite Pattern
+
+**Implementation Design**:
+
+- Server actions for all database operations
+- Client component for UI interactions
+- Optimistic updates with useTransition
+- Revalidates paths after bookmark changes
+- Uses existing `bookmarks` table (quiz_id, user_id, created_at)
+- All Supabase operations use JavaScript API (no raw SQL)
+
+### Component Reusability Pattern
+
+**QuizCard Component**:
+
+- Server component that can be used anywhere
+- Accepts flexible props for different contexts
+- Automatically fetches bookmark status
+- Supports custom additional info (rank, dates, counts)
+- Maintains consistent UI across all quiz lists
 
 ## Important Patterns & Preferences
 
@@ -302,19 +357,24 @@ The separation of quiz_elements and quiz_element_score is elegant:
   - Results page: `frontennd/src/app/quizzes/[quizId]/results/page.jsx` (Server Component)
   - Share buttons: `frontennd/src/app/quizzes/[quizId]/results/ShareButtons.jsx` (Client Component)
 - **Quiz Discovery** (NEW):
-  - All quizzes: `frontennd/src/app/quizzes/page.jsx`
-  - Hot quizzes: `frontennd/src/app/quizzes/hot/page.jsx`
-  - Recent quizzes: `frontennd/src/app/quizzes/recent/page.jsx`
+  - All quizzes: `frontennd/src/app/quizzes/page.jsx` (uses QuizCard)
+  - Hot quizzes: `frontennd/src/app/quizzes/hot/page.jsx` (uses QuizCard)
+  - Recent quizzes: `frontennd/src/app/quizzes/recent/page.jsx` (uses QuizCard)
   - User history: `frontennd/src/app/mypage/history/page.jsx`
+- **Bookmark System** (NEW):
+  - Server actions: `frontennd/src/app/components/bookmarkActions.js`
+  - Bookmark button: `frontennd/src/app/components/BookmarkButton.jsx` (Client Component)
+  - Quiz card: `frontennd/src/app/components/QuizCard.jsx` (Server Component)
+  - Favorite page: `frontennd/src/app/mypage/favorite/page.jsx`
 - **Layout & Navigation**: `frontennd/src/app/layout.jsx` (async server component with auth state)
 - **Home Page**: `frontennd/src/app/page.jsx` (updated with feature showcase)
 - **Supabase Clients**: `frontennd/src/utils/supabase/*.js`
 
 ### Remaining Unimplemented Pages
 
-- `/mypage` - User dashboard
-- `/mypage/quizzes/[quizId]` - User's quiz detail/edit
-- `/mypage/favorite` - Favorited quizzes (bookmark functionality)
+- `/mypage` - User dashboard overview
+- `/mypage/quizzes` - User's created quizzes list
+- `/mypage/quizzes/[quizId]` - User's quiz detail/edit page
 
 ## Environment & Configuration
 
